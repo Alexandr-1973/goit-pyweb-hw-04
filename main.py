@@ -8,12 +8,12 @@ import urllib.parse
 from threading import Thread
 from datetime import datetime
 
-BASE_DIR = pathlib.Path()
+# BASE_DIR = pathlib.Path()
 HTTP_PORT = 3000
 HTTP_HOST = '0.0.0.0'
 SOCKET_HOST = '127.0.0.1'
 SOCKET_PORT = 5000
-storage_path = "storage/data.json"
+storage_path = pathlib.Path("storage/data.json")
 
 class HttpHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -62,17 +62,18 @@ def save_data_from_form(data):
     parse_data = urllib.parse.unquote_plus(data.decode())
     try:
         parse_dict = {key: value for key, value in [el.split('=') for el in parse_data.split('&')]}
-        json_dict_part={str(datetime.now()):parse_dict}
+        json_part={str(datetime.now()):parse_dict}
 
-        if not pathlib.Path(storage_path).exists():
+        if not storage_path.exists():
+            storage_path.parent.mkdir(parents=True, exist_ok=True)
             with open(storage_path, 'w', encoding='utf-8') as file:
-                json.dump(json_dict_part, file, ensure_ascii=False, indent=4)
+                json.dump(json_part, file, ensure_ascii=False, indent=4)
         else:
             with open(storage_path, 'r', encoding='utf-8') as file:
-                json_dict = json.load(file)
-                json_dict.update(json_dict_part)
+                json_data = json.load(file)
+                json_data.update(json_part)
             with open(storage_path, 'w', encoding='utf-8') as file:
-                json.dump(json_dict, file, ensure_ascii=False, indent=4)
+                json.dump(json_data, file, ensure_ascii=False, indent=4)
 
     except ValueError as err:
         logging.error(err)
