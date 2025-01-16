@@ -8,7 +8,6 @@ import urllib.parse
 from threading import Thread
 from datetime import datetime
 
-# BASE_DIR = pathlib.Path()
 HTTP_PORT = 3000
 HTTP_HOST = '0.0.0.0'
 SOCKET_HOST = '127.0.0.1'
@@ -94,18 +93,21 @@ def run_socket_server(host, port):
     finally:
         server_socket.close()
 
-def run(server_class=HTTPServer, handler_class=HttpHandler):
-    server_address = ('', 3000)
-    http = server_class(server_address, handler_class)
+def run_http_server(host, port):
+    address = (host, port)
+    http_server = HTTPServer(address, HttpHandler)
+    logging.info("Starting http server")
     try:
-        http.serve_forever()
+        http_server.serve_forever()
     except KeyboardInterrupt:
-        http.server_close()
+        pass
+    finally:
+        http_server.server_close()
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format='%(threadName)s %(message)s')
-    server = Thread(target=run)
+    server = Thread(target=run_http_server, args=(HTTP_HOST, HTTP_PORT))
     server.start()
     server_socket = Thread(target=run_socket_server, args=(SOCKET_HOST, SOCKET_PORT))
     server_socket.start()
